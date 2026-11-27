@@ -464,16 +464,21 @@
   const uniq = (s) => [...new Set([...s])].join("");
 
   /* ---------- 生成 ---------- */
+  let emptyMust = [];  // 「必ず含める」なのに使える文字が残らなかった種類
   function sets() {
-    return KINDS.filter((k) => S.types[k].use).map((k) => {
+    const all = KINDS.filter((k) => S.types[k].use).map((k) => {
       let c = uniq((S.types[k].chars || CHARS[k]).replace(/\s/g, ""));
       if (S.noAmb) c = [...c].filter((x) => !AMBIGUOUS.includes(x)).join("");
       return { k, c, must: S.types[k].must };
-    }).filter((s) => s.c);
+    });
+    emptyMust = all.filter((s) => s.must && !s.c).map((s) => NAMES[s.k]);
+    return all.filter((s) => s.c);
   }
 
   function problem(ss) {
+    if (emptyMust.length) return `必ず含める${emptyMust.join("・")}に、使える文字が残っていません`;
     if (!ss.length) return "使える文字がありません";
+    if (S.min > 128) return "128文字までしか作れません";
     if (S.min > S.max) return "文字数の範囲が逆です";
     if (S.len < S.min || S.len > S.max) return `${S.min}〜${S.max}文字の範囲で選んでください`;
     const musts = ss.filter((s) => s.must).length;
@@ -518,7 +523,11 @@
     return null;
   }
 
-  const bitsOf = (ss) => Math.round(S.len * Math.log2(Math.max(2, ss.reduce((n, s) => n + s.c.length, 0))));
+  // 使える文字の数（重複は1つと数える）。1種類以下なら候補は1通りなので0ビット
+  const bitsOf = (ss) => {
+    const n = uniq(ss.map((s) => s.c).join("")).length;
+    return n < 2 ? 0 : Math.round(S.len * Math.log2(n));
+  };
 
   /* ---------- 表示 ---------- */
   const esc = (c) => c.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -713,8 +722,9 @@
       const ex = all(/(\d+)\s*(?:文字|桁)/g).map((m) => +m[1]).filter((n) => n >= 4);
       if (ex.length) { const n = Math.max(...ex); mins.push(n); maxs.push(n); }
     }
-    if (mins.length) st.min = Math.min(128, Math.max(...mins));
-    if (maxs.length) st.max = Math.min(128, Math.max(...maxs));
+    // 下限は一番大きいもの、上限は一番小さいものを使う（どの条件も満たすため）
+    if (mins.length) st.min = Math.max(...mins);
+    if (maxs.length) st.max = Math.min(128, ...maxs);
     st.len = Math.min(st.max, Math.max(st.min, 16));
     if (mins.length || maxs.length) {
       chips.push(st.min === st.max ? `${st.min}文字`
@@ -826,11 +836,12 @@
     }
     if (/(?:先頭|最初|末尾|最後)[^。\n]{0,15}記号[^。\n]{0,10}(?:不可|できません|使えません|禁止|NG)/.test(text)) { st.edgeNoSymbol = true; chips.push("先頭・末尾に記号なし"); }
     const prev = text.match(/(?:直近|過去|前回まで(?:の)?)\s*(\d+)\s*(?:回|世代|個)/);
-    if (prev) chips.push(`直近${prev[1]}回と重複なし`);
-    if (/(?:ID|ユーザー名|ユーザ名|メールアドレス|氏名|名前|生年月日|誕生日|電話番号)/.test(text)) chips.push("IDや名前は含みません");
+    if (prev) chips.push({ warn: true, text: `直近${prev[1]}回との重複は未確認` });
+    if (/(?:ID|ユーザー名|ユーザ名|メールアドレス|氏名|名前|生年月日|誕生日|電話番号)/.test(text)) chips.push({ warn: true, text: "IDや名前との一致は未確認" });
     if (/全角|スペース|空白/.test(text)) chips.push("半角・スペースなし");
 
-    if (st.min > st.max) chips.push({ warn: true, text: "文字数の範囲が読み取れません" });
+    if (st.min > 128) chips.push({ warn: true, text: "128文字までしか作れません" });
+    else if (st.min > st.max) chips.push({ warn: true, text: "文字数の範囲が読み取れません" });
     if (chips.length === 0) chips.push({ warn: true, text: "条件を読み取れませんでした。「細かく調整」で指定してください" });
     return { state: st, chips };
   }
