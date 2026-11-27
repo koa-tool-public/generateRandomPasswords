@@ -1,62 +1,962 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-	<head>
-		<meta charset="UTF-8"> 
-		<title>
-			ランダムなパスワードを瞬時に作成します 
-		</title>
-<!-- bootstrap -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> 
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js">
-		</script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
-		</script>
-<!-- /bootstrap -->
-		<script type="text/javascript" src="generate.js">
-		</script>
-		<style>
-			.snackbar-container {
-			margin-top: 150px;
-			position: fixed;
-			bottom: 1rem;
-			z-index: 9999;
-			}
-		</style>
-	</head>
-	<body>
-	
-		<main>
-			<nav class="navbar navbar-dark bg-dark">
-				<span class="navbar-brand">
-					瞬間パスワード 
-				</span>
-			</nav>
-			
-	
-	        <div class="container">
-	        <div id="snackbar" class="sticky-top  text-center snackbar-container" style="display: none;width:80%">
-				<div class="alert alert-success " role="alert">
-					クリップボードにコピーしました
-				</div>
-			</div>
-			<script>
-				layoutTableCells(108);
-			</script>
-			<div class="col text-center">
-				<button class="btn btn-primary btn-lg btn-block" onclick="regenerate()">
-					更新 
-				</button>
+<head>
+<!--
+  パスワード生成 by p83.work（https://p83.work/）
+  無料・登録不要・改変OK。自分のサーバーや手元のパソコンに置いて使えます。
+  ページ下部の p83.work と Kaeru inc. へのリンクは残してください。
+  パスワードはブラウザの中だけで作り、どこにも送信しません。
+  © Kaeru inc.
+-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' fill='%23c6f432' font-family='monospace' font-weight='700'%3E**%3C/text%3E%3C/svg%3E" />
+<title>瞬間「好きな」パスワード生成ツール｜ルールを貼るだけで自動調整 - p83.work</title>
+<meta name="description" content="ページを開いた瞬間にパスワードができます。サイトごとのややこしいパスワードルールも、貼り付けるだけで条件に合わせて作り直します。ブラウザ上で完結し、サーバーには送信しません。無料でダウンロードして自分のサーバーにも置けます。" />
+<link rel="canonical" href="https://p83.work/" />
+<meta property="og:title" content="瞬間「好きな」パスワード生成ツール" />
+<meta property="og:type" content="website" />
+<meta property="og:description" content="ページを開いた瞬間にパスワードができます。ややこしいルールも貼り付けるだけで自動調整。ブラウザ上で完結・サーバー送信なし。" />
+<meta property="og:url" content="https://p83.work/" />
+<meta property="og:image" content="https://p83.work/img/p83_img.jpg" />
+<meta property="og:site_name" content="p83.work" />
+<meta property="og:locale" content="ja_JP" />
+<meta name="twitter:card" content="summary" />
+<style>
+  :root {
+    --bg: #f3f3ef;
+    --surface: #ffffff;
+    --surface-2: #ebebe5;
+    --ink: #111311;
+    --ink-soft: #5b605b;
+    --ink-faint: #8f948e;
+    --line: #dcdcd4;
+    --accent: #3a7d00;
+    --accent-bg: #c6f432;
+    --accent-ink: #111311;
+    --digit: #2f6fdb;
+    --symbol: #d2481f;
+    --warn: #b3541e;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0e0d;
+      --surface: #161816;
+      --surface-2: #1f221f;
+      --ink: #f1f3ee;
+      --ink-soft: #a9aea7;
+      --ink-faint: #6e736c;
+      --line: #2a2e2a;
+      --accent: #c6f432;
+      --accent-bg: #c6f432;
+      --accent-ink: #0d0e0d;
+      --digit: #7fb0ff;
+      --symbol: #ff8a5c;
+      --warn: #ffb070;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; min-height: 100vh;
+    background: var(--bg); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.5;
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 28px 16px 48px; }
 
-            <p>好きな桁数のパスワードをクリックしてコピーできます。</p>
-			</div>
-			
-        </div>
-このページを開くと瞬時にパスワードが作成されます。 
-ブックマークがオススメ 
-		</main>
-		<footer>
-			要望・追加機能は「プルリクエスト」にて 
+  header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 18px; }
+  h1 { font-size: 1rem; margin: 0; letter-spacing: .04em; font-weight: 800; }
+  h1 span { color: var(--ink-faint); font-weight: 600; margin-left: .4em; }
+  .lock { font-size: .78rem; color: var(--ink-faint); white-space: nowrap; }
 
-		</footer>
-	</body>
+  /* ---------- 主役 ---------- */
+  .hero {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px 20px 18px;
+  }
+  .pw {
+    display: block; width: 100%;
+    background: none; border: 0; padding: 4px 0; text-align: left;
+    font-family: var(--mono); font-weight: 700;
+    font-size: clamp(1.3rem, 5.6vw, 2.15rem); line-height: 1.3;
+    letter-spacing: .03em; word-break: break-all;
+    min-height: 3.2rem;
+  }
+  .pw:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 6px; }
+  .pw .d { color: var(--digit); }
+  .pw .s { color: var(--symbol); }
+  .pw.err { font-family: var(--sans); font-size: 1rem; font-weight: 600; color: var(--warn); }
+
+  .bar { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+  .meter { flex: 1; height: 4px; border-radius: 9px; background: var(--surface-2); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 0; background: var(--accent-bg); transition: width .3s ease; }
+  .bits { font-family: var(--mono); font-size: .78rem; color: var(--ink-faint); min-width: 5.5em; text-align: right; }
+  .icon-btn {
+    width: 44px; height: 44px; flex: 0 0 auto;
+    display: inline-grid; place-items: center;
+    border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2);
+  }
+  .icon-btn svg { width: 20px; height: 20px; }
+  .icon-btn:active { transform: scale(.96); }
+  .copy-btn {
+    height: 44px; padding: 0 22px; flex: 0 0 auto;
+    border: 0; border-radius: 12px;
+    background: var(--accent-bg); color: var(--accent-ink);
+    font-weight: 800; letter-spacing: .04em;
+  }
+  .copy-btn:active { transform: scale(.97); }
+  .copy-btn.done { background: var(--ink); color: var(--bg); }
+  .spin svg { transition: transform .4s ease; }
+  .spin.go svg { transform: rotate(360deg); }
+
+  /* ---------- 文字数と種類 ---------- */
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 0; }
+  .seg {
+    display: inline-flex; padding: 3px; gap: 2px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  }
+  .seg button {
+    border: 0; background: none; border-radius: 9px;
+    padding: 7px 11px; min-height: 36px; min-width: 38px;
+    font-family: var(--mono); font-size: .88rem; font-weight: 700; color: var(--ink-soft);
+  }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .seg button:disabled { opacity: .25; cursor: default; }
+  .seg.types button { font-family: var(--sans); font-size: .82rem; }
+  .seg.len { flex: 1 1 auto; }
+  .seg.len button { flex: 1; }
+
+  /* ---------- 候補 ---------- */
+  .alts { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 6px; }
+  .alts button {
+    width: 100%; display: flex; align-items: center; gap: 10px;
+    text-align: left; border: 1px solid transparent; background: none;
+    border-radius: 10px; padding: 8px 10px;
+    font-family: var(--mono); font-size: .92rem; color: var(--ink-soft);
+  }
+  .alts button:hover { background: var(--surface); border-color: var(--line); color: var(--ink); }
+  .alts code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: inherit; }
+  .alts .tag { font-family: var(--sans); font-size: .72rem; color: var(--ink-faint); opacity: 0; }
+  .alts button:hover .tag, .alts button.done .tag { opacity: 1; }
+  .alts button.done { color: var(--accent); }
+
+  /* ---------- ルール ---------- */
+  .rule { margin-bottom: 14px; }
+  .examples { margin-bottom: 2px; }
+
+  /* ---------- 自動で作った表 ---------- */
+  .quick { margin-top: 26px; }
+  .q-grid {
+    display: grid; grid-template-columns: 3.2em repeat(3, minmax(0, 1fr));
+    gap: 6px; align-items: center;
+  }
+  .q-head { display: contents; }
+  .q-head span { font-size: .74rem; color: var(--ink-faint); font-weight: 700; letter-spacing: .04em; padding: 0 10px 2px; }
+  .q-len { font-family: var(--mono); font-size: .82rem; font-weight: 700; color: var(--ink-faint); text-align: right; padding-right: 4px; }
+  .q-cell {
+    min-width: 0; height: 40px; padding: 0 10px;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+    font-family: var(--mono); font-size: .86rem; text-align: left;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .q-cell:hover { border-color: var(--ink-faint); }
+  .q-cell.done { background: var(--accent-bg); color: var(--accent-ink); border-color: var(--accent-bg); }
+  .q-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: .74rem; color: var(--ink-faint); padding-left: calc(3.2em + 6px); }
+  .q-regen { border: 0; background: none; color: var(--ink-soft); font-size: .78rem; padding: 6px 4px; }
+  .q-regen:hover { color: var(--ink); }
+  .rule-box {
+    position: relative;
+    border: 1px dashed var(--line); border-radius: 16px;
+    background: transparent;
+    transition: border-color .2s, background .2s;
+  }
+  .rule-box:focus-within, .rule-box.on { border-style: solid; border-color: var(--ink-faint); background: var(--surface); }
+  .rule-box textarea {
+    display: block; width: 100%; resize: vertical;
+    min-height: 54px; max-height: 50vh;
+    border: 0; background: none; outline: none;
+    padding: 15px 44px 15px 16px; font-size: .9rem; line-height: 1.6;
+  }
+  .rule-box textarea::placeholder { color: var(--ink-faint); }
+  .rule-box textarea:placeholder-shown { min-height: calc(3 * 1.6em + 30px); }
+  @media (max-width: 560px) { .rule-box textarea:placeholder-shown { min-height: calc(5 * 1.6em + 30px); } }
+  .clear {
+    position: absolute; top: 8px; right: 8px;
+    width: 32px; height: 32px; border-radius: 8px; border: 0;
+    background: none; color: var(--ink-faint); font-size: 1.1rem; display: none;
+  }
+  .rule-box.on .clear { display: block; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips:not(:empty) { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .rule-box:not(:focus-within) textarea { max-height: 7.5em; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 99px;
+    background: var(--surface-2); font-size: .8rem; color: var(--ink);
+  }
+  .chip::before { content: "✓"; color: var(--accent); font-weight: 800; }
+  .chip.warn::before { content: "!"; color: var(--warn); }
+  .chip.warn { color: var(--warn); }
+  .chip code { font-family: var(--mono); font-size: .78rem; }
+  .examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; }
+  .examples span { font-size: .75rem; color: var(--ink-faint); margin-right: 2px; }
+  .examples button {
+    border: 0; background: none; padding: 4px 6px; border-radius: 6px;
+    font-size: .78rem; color: var(--ink-soft); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px;
+  }
+  .examples button:hover { color: var(--ink); background: var(--surface-2); }
+
+  /* ---------- 詳細 ---------- */
+  details.fine { margin-top: 8px; padding: 0 4px; }
+  details.fine summary {
+    cursor: pointer; list-style: none; font-size: .82rem; color: var(--ink-faint);
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 0;
+  }
+  details.fine summary::-webkit-details-marker { display: none; }
+  details.fine summary::before { content: "+"; font-family: var(--mono); font-weight: 700; }
+  details.fine[open] summary::before { content: "−"; }
+  .grid { display: grid; gap: 14px; margin-top: 14px; }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: .86rem; }
+  .row > .k { width: 5.5em; color: var(--ink-faint); flex: 0 0 auto; }
+  .row input[type="number"] {
+    width: 4.2em; text-align: center; padding: 6px 4px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--surface); font-family: var(--mono);
+  }
+  .row input[type="range"] { flex: 1 1 160px; accent-color: var(--ink); }
+  .types-tbl { display: grid; gap: 6px; }
+  .t-row {
+    display: grid; grid-template-columns: auto 4.8em 1fr auto; align-items: center; gap: 10px;
+    padding: 6px 10px; border-radius: 10px; background: var(--surface);
+    border: 1px solid var(--line); font-size: .86rem;
+  }
+  .t-row.off { opacity: .45; }
+  .t-row input[type="text"] {
+    min-width: 0; width: 100%; border: 0; background: var(--surface-2); border-radius: 6px;
+    padding: 6px 8px; font-family: var(--mono); font-size: .82rem;
+  }
+  .t-row label.must { font-size: .76rem; color: var(--ink-faint); display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--ink); margin: 0; }
+  .opts { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .84rem; color: var(--ink-soft); }
+  .opts label { display: inline-flex; align-items: center; gap: 6px; padding: 4px 0; }
+  select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); font-size: .85rem; }
+
+  footer { margin-top: 40px; font-size: .72rem; color: var(--ink-faint); text-align: center; }
+  footer p { margin: 4px 0; }
+  footer a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--line); }
+  footer a:hover { color: var(--ink); }
+
+  /* ---------- 無料配布 ---------- */
+  .free {
+    margin-top: 40px; padding: 20px;
+    border: 1px solid var(--line); border-radius: 20px; background: var(--surface);
+  }
+  .free-head { display: flex; align-items: flex-start; gap: 12px; }
+  .badge {
+    flex: 0 0 auto; padding: 3px 9px; border-radius: 7px;
+    background: var(--accent-bg); color: var(--accent-ink);
+    font-family: var(--mono); font-size: .78rem; font-weight: 800; letter-spacing: .08em;
+  }
+  .free-title { margin: 0; font-weight: 700; font-size: .95rem; line-height: 1.6; }
+  .free-steps {
+    list-style: none; counter-reset: s; margin: 16px 0 0; padding: 0;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  }
+  .free-steps li {
+    counter-increment: s; position: relative;
+    padding: 12px 12px 12px 40px; border-radius: 12px; background: var(--surface-2);
+    font-size: .8rem; color: var(--ink-soft); line-height: 1.5;
+  }
+  .free-steps li::before {
+    content: counter(s); position: absolute; left: 12px; top: 12px;
+    width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--ink); color: var(--bg); font-family: var(--mono); font-size: .72rem; font-weight: 800;
+  }
+  .free-steps b { display: block; color: var(--ink); font-size: .86rem; margin-bottom: 2px; }
+  .free-foot { display: flex; align-items: center; gap: 14px; margin-top: 16px; flex-wrap: wrap; }
+  .dl-btn {
+    height: 44px; padding: 0 20px; border: 0; border-radius: 12px;
+    background: var(--ink); color: var(--bg); font-weight: 800; letter-spacing: .03em;
+  }
+  .dl-btn:active { transform: scale(.97); }
+  .free-note { margin: 0; flex: 1 1 220px; font-size: .76rem; color: var(--ink-faint); }
+  .free-note a { color: inherit; text-underline-offset: 3px; }
+  @media (max-width: 560px) {
+    .free-steps { grid-template-columns: 1fr; }
+    .dl-btn { width: 100%; }
+  }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom));
+    transform: translate(-50%, 12px); opacity: 0; pointer-events: none;
+    background: var(--ink); color: var(--bg);
+    padding: 9px 18px; border-radius: 99px; font-size: .85rem; font-weight: 700;
+    transition: opacity .18s, transform .18s; z-index: 9;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 560px) {
+    .wrap { padding-top: 18px; }
+    h1 span { display: none; }
+    .q-grid { grid-template-columns: 2.2em repeat(3, minmax(0, 1fr)); gap: 5px; }
+    .q-cell { padding: 0 7px; font-size: .78rem; }
+    .q-head span { padding: 0 7px 2px; }
+    .q-foot { padding-left: calc(2.2em + 5px); }
+    .seg.types { flex: 1 1 100%; }
+    .seg.types button { flex: 1; }
+    .t-row { grid-template-columns: auto 4.2em 1fr; }
+    .t-row label.must { grid-column: 2 / -1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>瞬間「好きな」パスワード生成ツール</h1>
+    <span class="lock">🔒 ブラウザ上で完結・サーバー送信なし</span>
+  </header>
+
+  <section class="rule" aria-label="ルールの貼り付け">
+    <div class="rule-box" id="ruleBox">
+      <textarea id="rule" rows="1" placeholder="ややこしいルールは、ここに貼り付けてください。&#10;例：8〜16文字。英大文字・小文字・数字を各1文字以上。記号は _ と - のみ" spellcheck="false" aria-label="パスワードのルール"></textarea>
+      <button class="clear" id="clear" type="button" aria-label="ルールを消す">×</button>
+    </div>
+    <div class="examples" id="examples"><span>例</span></div>
+  </section>
+
+  <section class="hero" aria-label="パスワード">
+    <button class="pw" id="pw" type="button" title="クリックでコピー" aria-live="polite">—</button>
+    <div class="bar">
+      <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+      <span class="bits" id="bits"></span>
+      <button class="icon-btn spin" id="regen" type="button" aria-label="作り直す" title="作り直す（Space）">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+      </button>
+      <button class="copy-btn" id="copy" type="button">コピー</button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <details class="fine" id="fine">
+    <summary>細かく調整</summary>
+    <div class="grid">
+      <div class="row">
+        <span class="k">文字数</span>
+        <input type="range" id="lenRange" min="4" max="128" value="16" aria-label="文字数" />
+        <input type="number" id="lenNum" min="1" max="128" value="16" aria-label="文字数" />
+      </div>
+      <div class="row">
+        <span class="k">範囲</span>
+        <input type="number" id="minLen" min="1" max="128" value="4" aria-label="最小文字数" />〜
+        <input type="number" id="maxLen" min="1" max="128" value="128" aria-label="最大文字数" />
+      </div>
+      <div class="types-tbl" id="typesTbl"></div>
+      <div class="row">
+        <span class="k">種類</span>
+        <select id="minKinds" aria-label="何種類以上を含めるか">
+          <option value="0">チェックした種類を必ず含める</option>
+          <option value="2">2種類以上を含める</option>
+          <option value="3">3種類以上を含める</option>
+          <option value="4">4種類すべて含める</option>
+        </select>
+      </div>
+      <div class="opts">
+        <label><input type="checkbox" id="noAmb" /> 見分けにくい文字なし</label>
+        <label><input type="checkbox" id="noRepeat" /> 同じ文字を続けない</label>
+        <label><input type="checkbox" id="noSeq" /> 連番なし（123・abc）</label>
+        <label><input type="checkbox" id="startLetter" /> 先頭は英字</label>
+        <label><input type="checkbox" id="edgeNoSymbol" /> 先頭・末尾に記号なし</label>
+      </div>
+    </div>
+  </details>
+
+  <section class="quick" aria-label="すぐ使えるパスワード">
+    <div class="q-grid" id="quick" role="table">
+      <div class="q-head" role="row">
+        <span role="columnheader"></span>
+        <span role="columnheader">英数記号</span>
+        <span role="columnheader">英数</span>
+        <span role="columnheader">数字</span>
+      </div>
+    </div>
+    <div class="q-foot">
+      <span>押すとコピー</span>
+      <button class="q-regen" id="quickRegen" type="button">↻ 表を作り直す</button>
+    </div>
+  </section>
+
+  <section class="free" aria-label="無料で配布しています">
+    <div class="free-head">
+      <span class="badge">FREE</span>
+      <p class="free-title">このツールをダウンロードして、自分のサーバーや手元のパソコンでご利用いただけます。</p>
+    </div>
+    <ol class="free-steps">
+      <li><b>ダウンロード</b><span>HTMLファイル1つだけです</span></li>
+      <li><b>置く</b><span>サーバーにアップロード、またはパソコンに保存</span></li>
+      <li><b>開く</b><span>ブラウザで開けばそのまま動きます。ネットにつながっていなくても使えます</span></li>
+    </ol>
+    <div class="free-foot">
+      <button class="dl-btn" id="dl" type="button">⬇ ダウンロード</button>
+      <p class="free-note">無料・登録不要・改変OK。ページ下の「p83.work」と「Kaeru inc.」へのリンクは残してください。コードは <a href="https://github.com/koa-tool-public/generateRandomPasswords">GitHub</a> で公開しています。</p>
+    </div>
+  </section>
+
+  <footer>
+    <p><a href="https://p83.work/">Powered by p83.work</a> · © <a href="https://kaeru-inc.com/">Kaeru inc.</a> · <a href="https://github.com/koa-tool-public/generateRandomPasswords">GitHub</a></p>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  "use strict";
+  // ダウンロード用：画面が書き換わる前の、このファイルの中身を控えておく
+  const SNAPSHOT = "<!doctype html>\n" + document.documentElement.outerHTML + "\n";
+  const $ = (id) => document.getElementById(id);
+
+  const CHARS = {
+    lower: "abcdefghijklmnopqrstuvwxyz",
+    upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    digit: "0123456789",
+    symbol: "!#$%&*+-=?@_",
+  };
+  const NAMES = { lower: "英小文字", upper: "英大文字", digit: "数字", symbol: "記号" };
+  const KINDS = ["lower", "upper", "digit", "symbol"];
+  const AMBIGUOUS = "0Oo1lIi|`'\"";
+  const LENGTHS = [8, 12, 15, 16, 20, 32, 64];
+
+  /* ---------- 状態 ---------- */
+  const freshState = () => ({
+    len: 16, min: 4, max: 128,
+    types: {
+      lower: { use: true, must: true, chars: "" },
+      upper: { use: true, must: true, chars: "" },
+      digit: { use: true, must: true, chars: "" },
+      symbol: { use: true, must: true, chars: "" },
+    },
+    minKinds: 0,
+    noAmb: false, noRepeat: false, noSeq: false, startLetter: false, edgeNoSymbol: false,
+  });
+  let S = freshState();
+  let quickType = "all";
+  let ruleActive = false;
+  let current = "";
+
+  /* ---------- 乱数 ---------- */
+  const randInt = (n) => {
+    const lim = Math.floor(4294967296 / n) * n, b = new Uint32Array(1);
+    let x; do { crypto.getRandomValues(b); x = b[0]; } while (x >= lim);
+    return x % n;
+  };
+  const pick = (s) => s.charAt(randInt(s.length));
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = randInt(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const uniq = (s) => [...new Set([...s])].join("");
+
+  /* ---------- 生成 ---------- */
+  function sets() {
+    return KINDS.filter((k) => S.types[k].use).map((k) => {
+      let c = uniq((S.types[k].chars || CHARS[k]).replace(/\s/g, ""));
+      if (S.noAmb) c = [...c].filter((x) => !AMBIGUOUS.includes(x)).join("");
+      return { k, c, must: S.types[k].must };
+    }).filter((s) => s.c);
+  }
+
+  function problem(ss) {
+    if (!ss.length) return "使える文字がありません";
+    if (S.min > S.max) return "文字数の範囲が逆です";
+    if (S.len < S.min || S.len > S.max) return `${S.min}〜${S.max}文字の範囲で選んでください`;
+    const musts = ss.filter((s) => s.must).length;
+    const need = Math.max(musts, S.minKinds);
+    if (S.minKinds > ss.length) return `${S.minKinds}種類以上が必要ですが、使える種類は${ss.length}つです`;
+    if (need > S.len) return "文字数が足りません";
+    return "";
+  }
+
+  function isSeq(a, b, c) {
+    const cls = (x) => (/[0-9]/.test(x) ? "d" : /[a-z]/.test(x) ? "l" : /[A-Z]/.test(x) ? "u" : "");
+    if (!cls(a) || cls(a) !== cls(b) || cls(b) !== cls(c)) return false;
+    const p = a.charCodeAt(0), q = b.charCodeAt(0), r = c.charCodeAt(0);
+    return (q - p === 1 && r - q === 1) || (q - p === -1 && r - q === -1);
+  }
+
+  function passes(pw, ss) {
+    const kindsIn = ss.filter((s) => [...pw].some((ch) => s.c.includes(ch)));
+    if (ss.some((s) => s.must && !kindsIn.includes(s))) return false;
+    if (kindsIn.length < S.minKinds) return false;
+    if (S.noRepeat && /(.)\1/.test(pw)) return false;
+    if (S.noSeq) for (let i = 2; i < pw.length; i++) if (isSeq(pw[i - 2], pw[i - 1], pw[i])) return false;
+    if (S.startLetter && !/^[A-Za-z]/.test(pw)) return false;
+    if (S.edgeNoSymbol) {
+      const sym = ss.find((s) => s.k === "symbol");
+      if (sym && (sym.c.includes(pw[0]) || sym.c.includes(pw[pw.length - 1]))) return false;
+    }
+    return true;
+  }
+
+  function generate(ss) {
+    const pool = ss.map((s) => s.c).join("");
+    for (let t = 0; t < 2000; t++) {
+      const out = [];
+      const musts = ss.filter((s) => s.must);
+      const extra = shuffle(ss.filter((s) => !s.must)).slice(0, Math.max(0, S.minKinds - musts.length));
+      [...musts, ...extra].forEach((s) => out.push(pick(s.c)));
+      while (out.length < S.len) out.push(pick(pool));
+      const pw = shuffle(out).join("");
+      if (passes(pw, ss)) return pw;
+    }
+    return null;
+  }
+
+  const bitsOf = (ss) => Math.round(S.len * Math.log2(Math.max(2, ss.reduce((n, s) => n + s.c.length, 0))));
+
+  /* ---------- 表示 ---------- */
+  const esc = (c) => c.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  function paint(pw, ss) {
+    const d = ss.find((s) => s.k === "digit"), y = ss.find((s) => s.k === "symbol");
+    return [...pw].map((c) => {
+      if (d && d.c.includes(c)) return `<span class="d">${esc(c)}</span>`;
+      if (y && y.c.includes(c)) return `<span class="s">${esc(c)}</span>`;
+      return esc(c);
+    }).join("");
+  }
+
+  function render() {
+    syncControls();
+    const ss = sets();
+    const err = problem(ss);
+    const pwEl = $("pw");
+    if (err) {
+      current = "";
+      pwEl.className = "pw err"; pwEl.textContent = err;
+      $("meter").style.width = "0"; $("bits").textContent = "";
+      return;
+    }
+    const first = generate(ss);
+    if (!first) {
+      current = "";
+      pwEl.className = "pw err"; pwEl.textContent = "条件がきつすぎて作れません。条件を見直してください";
+      return;
+    }
+    current = first;
+    pwEl.className = "pw";
+    pwEl.innerHTML = paint(current, ss);
+    const bits = bitsOf(ss);
+    $("meter").style.width = Math.min(100, (bits / 128) * 100) + "%";
+    $("bits").textContent = bits + " bit";
+  }
+
+  /* ---------- 自動で作る表（ルールとは別に、いつもの条件で作る） ---------- */
+  function renderQuick() {
+    const grid = $("quick");
+    grid.querySelectorAll(".q-len, .q-cell").forEach((n) => n.remove());
+    const cols = [
+      { lower: 1, upper: 1, digit: 1, symbol: 1 },
+      { lower: 1, upper: 1, digit: 1 },
+      { digit: 1 },
+    ];
+    LENGTHS.forEach((len) => {
+      const lab = document.createElement("span");
+      lab.className = "q-len"; lab.textContent = len;
+      grid.appendChild(lab);
+      cols.forEach((col) => {
+        const ss = KINDS.filter((k) => col[k]).map((k) => ({ k, c: CHARS[k] }));
+        const pool = ss.map((s) => s.c).join("");
+        let pw;
+        do {
+          const out = ss.map((s) => pick(s.c));
+          while (out.length < len) out.push(pick(pool));
+          pw = shuffle(out).join("");
+        } while (/^[!-\/:-@\[-`{-~]|[!-\/:-@\[-`{-~]$/.test(pw) && ss.length > 1);
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "q-cell"; b.textContent = pw; b.title = pw;
+        b.addEventListener("click", () => {
+          copy(pw);
+          b.classList.add("done"); b.textContent = "コピーしました";
+          setTimeout(() => { b.classList.remove("done"); b.textContent = pw; }, 1100);
+        });
+        grid.appendChild(b);
+      });
+    });
+  }
+  $("quickRegen").addEventListener("click", renderQuick);
+
+  function applyQuickType(t) {
+    quickType = t;
+    const on = { all: ["lower", "upper", "digit", "symbol"], alnum: ["lower", "upper", "digit"], digit: ["digit"] }[t];
+    KINDS.forEach((k) => { S.types[k].use = on.includes(k); S.types[k].must = on.includes(k); S.types[k].chars = ""; });
+    S.minKinds = 0;
+  }
+
+  KINDS.forEach((k) => {
+    const row = document.createElement("div");
+    row.className = "t-row"; row.id = "row-" + k;
+    row.innerHTML =
+      `<input type="checkbox" id="use-${k}" aria-label="${NAMES[k]}を使う">` +
+      `<label for="use-${k}">${NAMES[k]}</label>` +
+      `<input type="text" id="chars-${k}" placeholder="${esc(CHARS[k])}" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="${NAMES[k]}で使える文字">` +
+      `<label class="must"><input type="checkbox" id="must-${k}"> 必ず含める</label>`;
+    $("typesTbl").appendChild(row);
+    $("use-" + k).addEventListener("change", (e) => { S.types[k].use = e.target.checked; manual(); });
+    $("must-" + k).addEventListener("change", (e) => { S.types[k].must = e.target.checked; manual(); });
+    $("chars-" + k).addEventListener("input", (e) => { S.types[k].chars = e.target.value; manual(); });
+  });
+
+  function manual() { quickType = null; render(); }
+
+  const num = (v, d) => { const n = parseInt(v, 10); return isNaN(n) ? d : n; };
+  $("lenRange").addEventListener("input", (e) => { S.len = num(e.target.value, 16); render(); });
+  $("lenNum").addEventListener("change", (e) => { S.len = Math.min(128, Math.max(1, num(e.target.value, 16))); render(); });
+  $("minLen").addEventListener("change", (e) => { S.min = Math.max(1, num(e.target.value, 1)); render(); });
+  $("maxLen").addEventListener("change", (e) => { S.max = Math.min(128, num(e.target.value, 128)); render(); });
+  $("minKinds").addEventListener("change", (e) => { S.minKinds = num(e.target.value, 0); manual(); });
+  ["noAmb", "noRepeat", "noSeq", "startLetter", "edgeNoSymbol"].forEach((id) =>
+    $(id).addEventListener("change", (e) => { S[id] = e.target.checked; render(); }));
+
+  function syncControls() {
+    $("lenRange").value = S.len; $("lenNum").value = S.len;
+    $("minLen").value = S.min; $("maxLen").value = S.max;
+    KINDS.forEach((k) => {
+      const t = S.types[k];
+      $("use-" + k).checked = t.use;
+      $("must-" + k).checked = t.must;
+      if (document.activeElement !== $("chars-" + k)) $("chars-" + k).value = t.chars;
+      $("row-" + k).classList.toggle("off", !t.use);
+    });
+    $("minKinds").value = String(S.minKinds);
+    ["noAmb", "noRepeat", "noSeq", "startLetter", "edgeNoSymbol"].forEach((id) => { $(id).checked = S[id]; });
+  }
+
+  /* ---------- ルールの読み取り ---------- */
+  const SYMBOL_NAMES = [
+    [/アンダースコア|アンダーバー|アンダーライン/, "_"], [/ハイフン|マイナス/, "-"], [/ピリオド|ドット/, "."],
+    [/アットマーク/, "@"], [/シャープ|ハッシュ|井桁/, "#"], [/エクスクラメーション|感嘆符|ビックリマーク/, "!"],
+    [/ドル/, "$"], [/パーセント/, "%"], [/アンパサンド|アンド記号/, "&"], [/アスタリスク|米印/, "*"],
+    [/プラス/, "+"], [/イコール/, "="], [/クエスチョン|疑問符/, "?"], [/スラッシュ/, "/"],
+    [/チルダ/, "~"], [/カンマ|コンマ/, ","], [/セミコロン/, ";"], [/コロン/, ":"], [/キャレット/, "^"],
+  ];
+  const TYPE_WORDS = "(?:半角|全角)?(?:英小文字|英大文字|小文字|大文字|英数字|英数|英字|英文字|アルファベット|数字|記号|特殊文字)";
+  const TYPE_GROUP = `(?:${TYPE_WORDS}(?:[・、,，/\\s]|と|や|および|及び|または|もしくは)*)+`;
+  const BAN = "(?:使用できません|使用できない|使用不可|使えません|使えない|利用できません|利用不可|不可|禁止|NG|含めないで|含まないで|含めることはできません)";
+
+  function typesIn(str) {
+    const out = new Set();
+    const re = /英小文字|英大文字|小文字|大文字|英数字|英数|英字|英文字|アルファベット|数字|数値|記号|特殊文字/g;
+    let m;
+    while ((m = re.exec(str))) {
+      const w = m[0];
+      if (/小文字/.test(w)) out.add("lower");
+      else if (/大文字/.test(w)) out.add("upper");
+      else if (/英数/.test(w)) { out.add("lower"); out.add("upper"); out.add("digit"); }
+      else if (/英字|英文字|アルファベット/.test(w)) { out.add("lower"); out.add("upper"); }
+      else if (/数字|数値/.test(w)) out.add("digit");
+      else out.add("symbol");
+    }
+    return out;
+  }
+
+  function symbolRun(line, allowSingle) {
+    const spaced = line
+      .replace(/([^\x00-\x7F])([!-~])/g, "$1 $2")
+      .replace(/([!-~])([^\x00-\x7F])/g, "$1 $2");
+    const toks = spaced.split(/[\s、]+/).filter(Boolean);
+    const isSym = (t) => /^[!-\/:-@\[-`{-~]+$/.test(t);
+    let found = "", group = [];
+    const flush = () => {
+      if (group.length >= 2 && group.slice(0, -1).every((t) => t.length === 2 && t.endsWith(","))) {
+        group = group.map((t, i) => (i < group.length - 1 ? t.slice(0, -1) : t));
+      }
+      group = group.map((t) => (t.length > 2 && /^\(.*\)$/.test(t) ? t.slice(1, -1) : t));
+      const s = uniq(group.join(""));
+      if (s.length >= 2 || (allowSingle && s.length === 1)) found += s;
+      group = [];
+    };
+    const joiner = /^(?:と|や|および|及び|または|か)$/;
+    toks.forEach((t) => {
+      if (isSym(t)) group.push(t);
+      else if (!(group.length && joiner.test(t))) flush();
+    });
+    flush();
+    return found;
+  }
+
+  function parseRule(raw) {
+    const text = raw
+      .replace(/[！-～]/g, (c) => (c === "：" ? c : String.fromCharCode(c.charCodeAt(0) - 0xfee0)))
+      .replace(/　/g, " ")
+      .replace(/[〜]/g, "~")
+      .replace(/([一二三四])(?=\s*(?:種類|つ以上))/g, (c) => "一二三四".indexOf(c) + 1);
+
+    const st = freshState();
+    const chips = [];
+    const sentences = text.split(/[。\n]/).map((s) => s.trim()).filter(Boolean);
+
+    // 文字数
+    const mins = [], maxs = [];
+    const all = (re) => [...text.matchAll(re)];
+    all(/(\d+)\s*(?:文字|桁|字)\s*以上/g).forEach((m) => mins.push(+m[1]));
+    all(/(?:最低|最小|少なくとも)\s*(\d+)/g).forEach((m) => mins.push(+m[1]));
+    all(/(\d+)\s*(?:文字|桁|字)\s*(?:以下|以内|まで)/g).forEach((m) => maxs.push(+m[1]));
+    all(/(?:最大|最長|上限)\s*(\d+)/g).forEach((m) => maxs.push(+m[1]));
+    all(/(\d+)\s*(?:文字|桁|字)?\s*(?:~|-|–|―|から)\s*(\d+)\s*(?:文字|桁|字)/g).forEach((m) => { mins.push(+m[1]); maxs.push(+m[2]); });
+    if (!mins.length && !maxs.length) {
+      const ex = all(/(\d+)\s*(?:文字|桁)/g).map((m) => +m[1]).filter((n) => n >= 4);
+      if (ex.length) { const n = Math.max(...ex); mins.push(n); maxs.push(n); }
+    }
+    if (mins.length) st.min = Math.min(128, Math.max(...mins));
+    if (maxs.length) st.max = Math.min(128, Math.max(...maxs));
+    st.len = Math.min(st.max, Math.max(st.min, 16));
+    if (mins.length || maxs.length) {
+      chips.push(st.min === st.max ? `${st.min}文字`
+        : mins.length && maxs.length ? `${st.min}〜${st.max}文字`
+        : mins.length ? `${st.min}文字以上` : `${st.max}文字以下`);
+    }
+
+    // 種類
+    const mentioned = typesIn(text);
+    const banned = new Set();
+    let only = null;
+    let bannedSyms = "", allowedSyms = "";
+    let minKinds = 0;
+    const must = new Set();
+
+    sentences.forEach((s) => {
+      const run = symbolRun(s, /記号/.test(s) && /のみ|だけ|使用でき|使え|利用でき|可能|不可|禁止/.test(s));
+      const negOnly = /(?:だけ|のみ)の(?:パスワード|もの|組み合わせ)[^。]*(?:できません|不可|使えません|NG|禁止)/.test(s);
+      const banMatch = s.match(new RegExp(`(${TYPE_GROUP})(?:は|を|が|も)?\\s*(?:全て|すべて|一切)?\\s*${BAN}`));
+      if (negOnly) {
+        minKinds = Math.max(minKinds, 2);
+      } else if (banMatch) {
+        const ts = typesIn(banMatch[1]);
+        if (ts.has("symbol") && run) { bannedSyms += run; ts.delete("symbol"); }
+        ts.forEach((k) => banned.add(k));
+      } else if (run && new RegExp(BAN).test(s)) {
+        bannedSyms += run;
+      } else if (run) {
+        allowedSyms += run;
+      }
+
+      if (!negOnly) {
+        const onlyMatch = s.match(new RegExp(`(${TYPE_GROUP})(?:の)?(?:のみ|だけ|以外|で設定|で入力|で作成|で登録|で構成)`));
+        if (onlyMatch) {
+          const ts = typesIn(onlyMatch[1]);
+          if (!(ts.size === 1 && ts.has("symbol"))) only = new Set([...(only || []), ...ts]);
+        }
+        if (/暗証番号|PIN/i.test(s) && !/英|記号/.test(s)) only = new Set([...(only || []), "digit"]);
+      }
+
+      // 名前で書かれた記号
+      if (/記号/.test(s) && !run && !new RegExp(BAN).test(s)) {
+        SYMBOL_NAMES.forEach(([re, c]) => { if (re.test(s)) allowedSyms += c; });
+      }
+
+      // 必須
+      const ts = typesIn(s);
+      const kn = s.match(/(\d)\s*種類以上|うち\s*(\d)\s*(?:つ|種類)/);
+      if (kn) {
+        minKinds = Math.max(minKinds, +(kn[1] || kn[2]));
+      } else if (!negOnly && !banMatch && ts.size && /含|必須|必ず|組み合わせ|組合せ|混在|混ぜ|使用して|使って|それぞれ|各\s*\d*\s*文字以上/.test(s)) {
+        if (/いずれか|どれか/.test(s)) { /* 1種類でよい */ }
+        else if (/組み合わせ|組合せ|混在|混ぜ/.test(s) && !/それぞれ|各|すべて|全て|いずれも|両方/.test(s)) minKinds = Math.max(minKinds, Math.min(2, ts.size));
+        else ts.forEach((k) => must.add(k));
+      }
+    });
+
+    // 文字の一覧（a b c … のような行）
+    const lists = { lower: "", upper: "", digit: "" };
+    text.split(/\n/).forEach((line) => {
+      const toks = line.trim().split(/[\s、,]+/).filter(Boolean);
+      if (toks.length < 2 || !toks.every((t) => t.length === 1)) return;
+      toks.forEach((t) => {
+        if (/[a-z]/.test(t)) lists.lower += t;
+        else if (/[A-Z]/.test(t)) lists.upper += t;
+        else if (/[0-9]/.test(t)) lists.digit += t;
+      });
+    });
+
+    // 使う種類を決める
+    const anyType = mentioned.size > 0;
+    KINDS.forEach((k) => {
+      let use;
+      if (only) use = only.has(k);
+      else if (k === "symbol") use = mentioned.has("symbol") || allowedSyms !== "" || !anyType;
+      else use = true;
+      if (banned.has(k)) use = false;
+      st.types[k].use = use;
+    });
+    ["lower", "upper", "digit"].forEach((k) => { if (lists[k] && st.types[k].use) st.types[k].chars = uniq(lists[k]); });
+    let syms = uniq(allowedSyms || CHARS.symbol);
+    if (bannedSyms) syms = [...syms].filter((c) => !bannedSyms.includes(c)).join("");
+    if (st.types.symbol.use) st.types.symbol.chars = syms;
+
+    const used = KINDS.filter((k) => st.types[k].use);
+    const usedMust = used.filter((k) => must.has(k));
+    if (usedMust.length || minKinds) {
+      KINDS.forEach((k) => { st.types[k].must = usedMust.includes(k); });
+      st.minKinds = minKinds > usedMust.length ? Math.min(4, minKinds) : 0;
+    } else {
+      KINDS.forEach((k) => { st.types[k].must = st.types[k].use; });
+    }
+
+    // 種類のチップ
+    const label = (k) => (k === "symbol" ? `記号 <code>${esc(st.types.symbol.chars)}</code>` : NAMES[k]);
+    if (anyType || allowedSyms || only) chips.push(used.map(label).join("・") + (only ? "のみ" : ""));
+    banned.forEach((k) => chips.push({ text: `${NAMES[k]}なし` }));
+    if (bannedSyms) chips.push({ html: `<code>${esc(uniq(bannedSyms))}</code> を除外` });
+    if (st.minKinds) chips.push(`${st.minKinds}種類以上`);
+    else if (usedMust.length && usedMust.length === used.length) chips.push("各1文字以上");
+    else if (usedMust.length) chips.push(usedMust.map((k) => NAMES[k]).join("・") + "を必ず含む");
+
+    // そのほかの条件
+    if (/同じ文字[^。\n]{0,12}(?:連続|続け)|(?:\d+)\s*(?:文字|回)以上[^。\n]{0,4}連続|同じ数字の連続/.test(text)) { st.noRepeat = true; chips.push("同じ文字を続けない"); }
+    if (/連番|連続した(?:数字|文字|英字)|順番に並|1234|abc/i.test(text)) { st.noSeq = true; chips.push("連番なし"); }
+    if (/(?:先頭|最初|1文字目|頭)[^。\n]{0,10}(?:英字|アルファベット)|(?:英字|アルファベット)で始/.test(text) ||
+        /(?:先頭|最初|1文字目)[^。\n]{0,10}数字[^。\n]{0,10}(?:不可|できません|使えません)/.test(text)) {
+      st.startLetter = true; chips.push("先頭は英字");
+    }
+    if (/(?:先頭|最初|末尾|最後)[^。\n]{0,15}記号[^。\n]{0,10}(?:不可|できません|使えません|禁止|NG)/.test(text)) { st.edgeNoSymbol = true; chips.push("先頭・末尾に記号なし"); }
+    const prev = text.match(/(?:直近|過去|前回まで(?:の)?)\s*(\d+)\s*(?:回|世代|個)/);
+    if (prev) chips.push(`直近${prev[1]}回と重複なし`);
+    if (/(?:ID|ユーザー名|ユーザ名|メールアドレス|氏名|名前|生年月日|誕生日|電話番号)/.test(text)) chips.push("IDや名前は含みません");
+    if (/全角|スペース|空白/.test(text)) chips.push("半角・スペースなし");
+
+    if (st.min > st.max) chips.push({ warn: true, text: "文字数の範囲が読み取れません" });
+    if (chips.length === 0) chips.push({ warn: true, text: "条件を読み取れませんでした。「細かく調整」で指定してください" });
+    return { state: st, chips };
+  }
+
+  function renderChips(chips) {
+    $("chips").innerHTML = chips.map((c) => {
+      if (typeof c === "string") return `<span class="chip">${c.includes("<code>") ? c : esc(c)}</span>`;
+      if (c.html) return `<span class="chip">${c.html}</span>`;
+      return `<span class="chip${c.warn ? " warn" : ""}">${esc(c.text)}</span>`;
+    }).join("");
+  }
+
+  let ruleTimer = null;
+  function onRule() {
+    const v = $("rule").value;
+    autosize();
+    $("ruleBox").classList.toggle("on", v.trim() !== "");
+    clearTimeout(ruleTimer);
+    ruleTimer = setTimeout(() => {
+      if (v.trim() === "") { clearRule(true); return; }
+      const r = parseRule(v);
+      S = r.state; ruleActive = true; quickType = null;
+      renderChips(r.chips);
+      render();
+    }, 180);
+  }
+  function clearRule(rerender) {
+    $("rule").value = ""; autosize();
+    $("ruleBox").classList.remove("on");
+    $("chips").innerHTML = "";
+    ruleActive = false;
+    S = freshState(); applyQuickType("all");
+    if (rerender) render();
+  }
+  function autosize() {
+    const t = $("rule");
+    t.style.height = "auto";
+    if (!t.value) return;
+    t.style.height = Math.min(t.scrollHeight + 2, window.innerHeight * 0.5) + "px";
+  }
+  $("rule").addEventListener("input", onRule);
+  $("clear").addEventListener("click", () => { clearRule(true); $("rule").focus(); });
+
+  /* ---------- 例 ---------- */
+  const EXAMPLES = [
+    ["社内システム", "パスワードルール\n直近４回使用されたパスワードと異なること\n12文字以上・32文字以下\n半角の英字・数字・記号をそれぞれ１文字以上含めること(下記参照)\n利用可能な文字\n半角の英字\na b c d e f g h i j k l m n o p q r s t u v w x y z\nA B C D E F G H I J K L M N O P Q R S T U V W X Y Z\n数字\n0 1 2 3 4 5 6 7 8 9\n記号\n! # % & + - . / : = ? [ ] _ @"],
+    ["銀行", "6文字以上・8文字以下で設定してください\n半角英小文字と半角数字をそれぞれ1文字以上含めてください\n記号・英大文字は使用できません\n直近3回使用されたパスワードと異なること"],
+    ["3種類以上", "8〜16文字\n英大文字・英小文字・数字・記号のうち、3種類以上を含めてください\n使える記号は次のものだけです\n! ? # $ %"],
+    ["先頭は英字", "8～20文字の半角英数字\n先頭は英字にしてください\n同じ文字を3文字以上連続させないでください\n連番（123、abcなど）は使用できません"],
+    ["使えない記号", "半角英数字記号で10文字以上\n次の記号は使用できません：< > & \" ' \\\n英大文字、英小文字、数字をそれぞれ含めること"],
+    ["記号は_と-だけ", "10文字以上20文字以下。英字・数字・記号のうち2種類以上を含めること。記号はアンダースコアとハイフンだけ使えます。"],
+    ["暗証番号", "暗証番号は4桁の数字で設定してください。同じ数字の連続（1111など）や連番（1234など）は使用できません。"],
+  ];
+  EXAMPLES.forEach(([name, text]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = name;
+    b.addEventListener("click", () => { $("rule").value = text; onRule(); });
+    $("examples").appendChild(b);
+  });
+
+  /* ---------- コピー ---------- */
+  let toastTimer;
+  function toast(msg) {
+    const t = $("toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 1400);
+  }
+  function fallbackCopy(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch (e) { /* noop */ }
+    ta.remove();
+  }
+  function copy(text, el) {
+    if (!text) return;
+    const done = () => {
+      toast("コピーしました");
+      if (el) { el.classList.add("done"); setTimeout(() => el.classList.remove("done"), 1200); }
+      if (el === $("copy")) { el.textContent = "✓"; setTimeout(() => { el.textContent = "コピー"; }, 1200); }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, () => { fallbackCopy(text); done(); });
+    } else { fallbackCopy(text); done(); }
+  }
+  $("copy").addEventListener("click", () => copy(current, $("copy")));
+  $("pw").addEventListener("click", () => copy(current, $("copy")));
+  $("regen").addEventListener("click", () => {
+    const b = $("regen"); b.classList.remove("go"); void b.offsetWidth; b.classList.add("go");
+    render();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.target.closest("textarea, input, select, button")) return;
+    if (e.key === " ") { e.preventDefault(); $("regen").click(); }
+    if ((e.metaKey || e.ctrlKey) && e.key === "c" && !String(getSelection())) { copy(current, $("copy")); }
+  });
+
+  /* ---------- ツールのダウンロード ---------- */
+  async function toolSource() {
+    if (/^https?:$/.test(location.protocol)) {
+      try {
+        const res = await fetch(location.href.split("#")[0], { cache: "no-store" });
+        const text = await res.text();
+        if (res.ok && text.includes("Powered by p83.work")) return text;
+      } catch (e) { /* 取れなければ控えを使う */ }
+    }
+    return SNAPSHOT;
+  }
+  $("dl").addEventListener("click", async () => {
+    const src = await toolSource();
+    const url = URL.createObjectURL(new Blob([src], { type: "text/html;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url; a.download = "password-generator.html";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast("ダウンロードしました");
+  });
+
+  applyQuickType("all");
+  render();
+  renderQuick();
+
+  // 動作確認用（ページの表示には使わない）
+  window.__pw = { parseRule, sets: () => sets(), state: () => S };
+})();
+</script>
+</body>
 </html>
